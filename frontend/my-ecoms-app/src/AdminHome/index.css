@@ -1,0 +1,8 @@
+.admin-home-wrapper {
+  min-height: 100vh;
+  background: #f1f3f4;
+}
+
+.admin-home-content {
+  padding: 20px;
+}

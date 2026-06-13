@@ -1,0 +1,8 @@
+.home-wrapper {
+  min-height: 100vh;
+  background: #f1f3f4;
+}
+
+.home-content {
+  padding: 20px;
+}

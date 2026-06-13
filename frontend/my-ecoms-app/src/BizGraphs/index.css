@@ -1,0 +1,89 @@
+* {
+  box-sizing: border-box;
+}
+
+.bizgraphs-container {
+  min-height: 100vh;
+  padding: 30px;
+  background: #f8f5f2;
+}
+
+.bizgraphs-title {
+  text-align: center;
+  color: #4e342e;
+  margin-bottom: 30px;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.graph-card {
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.graph-title {
+  color: #5d4037;
+  margin-bottom: 25px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.recharts-wrapper {
+  font-size: 14px;
+}
+
+.trend-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.trend-select {
+  min-width: 220px;
+  padding: 12px 16px;
+  border: 2px solid #d6c4b8;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  color: #5d4037;
+  outline: none;
+  cursor: pointer;
+}
+
+.trend-select:focus {
+  border-color: #8d6e63;
+}
+
+@media screen and (max-width: 768px) {
+  .trend-filters {
+    flex-direction: column;
+  }
+
+  .trend-select {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .bizgraphs-container {
+    padding: 15px;
+  }
+
+  .bizgraphs-title {
+    font-size: 26px;
+  }
+
+  .graph-card {
+    padding: 15px;
+  }
+
+  .graph-title {
+    font-size: 18px;
+  }
+}

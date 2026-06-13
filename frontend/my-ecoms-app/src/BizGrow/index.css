@@ -1,0 +1,303 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.bizgrow-container {
+  min-height: 100vh;
+  padding: 30px;
+  background: linear-gradient(135deg, #fff8f2, #fef3e2);
+}
+
+/* Header */
+
+.bizgrow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.bizgrow-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #4e342e;
+}
+
+.refresh-btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+
+  padding: 12px 22px;
+  border-radius: 12px;
+
+  background: #6d4c41;
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: #4e342e;
+  transform: translateY(-2px);
+}
+
+/* Stats Cards */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+
+  gap: 25px;
+
+  margin-bottom: 35px;
+}
+
+.stat-card {
+  background: white;
+
+  padding: 28px;
+
+  border-radius: 18px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card h4 {
+  font-size: 14px;
+  color: #8d6e63;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.stat-card h2 {
+  font-size: 34px;
+  color: #3e2723;
+  font-weight: 700;
+}
+
+/* Filters */
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  margin-bottom: 35px;
+}
+
+.filter-btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+
+  padding: 12px 22px;
+  border-radius: 30px;
+
+  background: #efebe9;
+  color: #5d4037;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: #bcaaa4;
+  color: white;
+}
+
+.active-filter {
+  background: #6d4c41;
+  color: white;
+}
+
+/* Table */
+
+.top-products-card {
+  background: white;
+
+  border-radius: 20px;
+
+  padding: 25px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  font-size: 24px;
+  color: #4e342e;
+  margin-bottom: 20px;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table thead {
+  background: #6d4c41;
+}
+
+.products-table th {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+
+  padding: 16px;
+  text-align: left;
+}
+
+.products-table td {
+  padding: 16px;
+  border-bottom: 1px solid #ececec;
+
+  color: #424242;
+  font-size: 14px;
+}
+
+.products-table tbody tr {
+  transition: 0.2s ease;
+}
+
+.products-table tbody tr:hover {
+  background: #faf5f3;
+}
+
+.products-table tbody tr:first-child td {
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.products-table tbody tr:nth-child(2) td {
+  font-weight: 600;
+  color: #1565c0;
+}
+
+.products-table tbody tr:nth-child(3) td {
+  font-weight: 600;
+  color: #ef6c00;
+}
+
+/* Loading */
+
+.bizgrow-loading {
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 22px;
+  font-weight: 600;
+
+  color: #6d4c41;
+}
+
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 250px;
+
+  padding: 12px 15px;
+
+  border: 1px solid #d7ccc8;
+  border-radius: 10px;
+
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #6d4c41;
+}
+
+.sort-select {
+  padding: 12px 15px;
+
+  border: 1px solid #d7ccc8;
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.pagination {
+  margin-top: 25px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 20px;
+}
+
+.pagination button {
+  border: none;
+  cursor: pointer;
+
+  padding: 10px 18px;
+
+  background: #6d4c41;
+  color: white;
+
+  border-radius: 8px;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-weight: 600;
+  color: #4e342e;
+}
+
+/* Mobile */
+
+@media screen and (max-width: 768px) {
+  .bizgrow-container {
+    padding: 18px;
+  }
+
+  .bizgrow-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .bizgrow-title {
+    font-size: 26px;
+  }
+
+  .stat-card h2 {
+    font-size: 28px;
+  }
+
+  .products-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
