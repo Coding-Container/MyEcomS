@@ -53,8 +53,6 @@ app.use("/api/payment", paymentRoutes);
 const addressRoutes = require("./routes/addressRoutes");
 app.use("/api/address", addressRoutes);
 
-
-
 const PORT = process.env.PORT || 5000;
 
 app.use(errorHandler);
