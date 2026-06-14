@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
 import {
   BarChart,
@@ -25,7 +25,7 @@ const BizGraphs = () => {
 
   const [trendData, setTrendData] = useState([]);
 
-  const getTrendData = async (productName, year) => {
+  const getTrendData = useCallback(async (productName, year) => {
     try {
       const token = getToken();
 
@@ -43,7 +43,7 @@ const BizGraphs = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     getGraphData();
@@ -56,13 +56,13 @@ const BizGraphs = () => {
 
       getTrendData(firstProduct, selectedYear);
     }
-  }, [graphData]);
+  }, [graphData, getTrendData, selectedYear]);
 
   useEffect(() => {
     if (selectedProduct) {
       getTrendData(selectedProduct, selectedYear);
     }
-  }, [selectedProduct, selectedYear]);
+  }, [selectedProduct, selectedYear, getTrendData]);
 
   const getGraphData = async () => {
     try {

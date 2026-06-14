@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 import Navbar from "../Navbar";
@@ -31,7 +31,7 @@ const CartPage = () => {
   const token = getToken();
 
   // ================= CART =================
-  const getCartItems = async () => {
+  const getCartItems = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -49,10 +49,10 @@ const CartPage = () => {
       setLoading(false);
       setInitialLoading(false); // 🔥 ADD THIS LINE
     }
-  };
+  }, []);
 
   // ================= ADDRESS =================
-  const getAddresses = async () => {
+  const getAddresses = useCallback(async () => {
     if (!token) return;
     try {
       const { data } = await api.get("/api/address", {
@@ -66,7 +66,7 @@ const CartPage = () => {
     } catch {
       toast.error("Failed to load address");
     }
-  };
+  }, [token]);
 
   const saveAddress = async () => {
     try {
@@ -219,6 +219,7 @@ const CartPage = () => {
   useEffect(() => {
     getCartItems();
     getAddresses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (initialLoading) {
@@ -252,6 +253,7 @@ const CartPage = () => {
                   <img
                     src={item.product.imageUrl}
                     className="cart-product-image"
+                    alt={item.product.name}
                   />
 
                   <div className="cart-item-details">
