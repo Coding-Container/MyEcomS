@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
 import { toast } from "react-toastify";
@@ -13,11 +13,7 @@ const OrderDetails = () => {
 
   const { id } = useParams();
 
-  useEffect(() => {
-    getOrder();
-  }, []);
-
-  const getOrder = async () => {
+  const getOrder = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -40,7 +36,11 @@ const OrderDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    getOrder();
+  }, [getOrder]);
 
   if (loading) {
     return (
