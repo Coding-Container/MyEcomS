@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "../api/axios";
 import { getToken } from "../auth";
 import "./index.css";
@@ -73,7 +73,7 @@ const HomePage = ({ isAdmin = false }) => {
   };
 
   // ---------------- PRODUCTS ----------------
-  const getAllProducts = async () => {
+  const getAllProducts = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -105,7 +105,7 @@ const HomePage = ({ isAdmin = false }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [chocoType]);
 
   // ---------------- CART ----------------
   const getCartItems = async () => {
@@ -186,7 +186,7 @@ const HomePage = ({ isAdmin = false }) => {
     window.addEventListener("cartUpdated", updateCart);
 
     return () => window.removeEventListener("cartUpdated", updateCart);
-  }, [chocoType]);
+  }, [getAllProducts]);
 
   // ---------------- LOADING UI ----------------
   if (loading) {
