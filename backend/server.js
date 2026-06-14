@@ -6,6 +6,8 @@ const errorHandler = require("./middleware/errorHandler");
 
 const helmet = require("helmet");
 
+const allowedOrigin = process.env.CLIENT_URL;
+
 dotenv.config();
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is missing");
@@ -17,7 +19,7 @@ app.disable("x-powered-by");
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigin,
     credentials: true,
   }),
 );
