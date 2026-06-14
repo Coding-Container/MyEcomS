@@ -17,9 +17,7 @@ app.disable("x-powered-by");
 
 app.use(
   cors({
-    origin: [
-      "https://myecoms.onrender.com"
-    ],
+    origin: process.env.CLIENT_URL,
     credentials: true,
   }),
 );
