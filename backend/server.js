@@ -6,7 +6,10 @@ const errorHandler = require("./middleware/errorHandler");
 
 const helmet = require("helmet");
 
-const allowedOrigin = process.env.CLIENT_URL;
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://my-ecom-s.vercel.app",
+];
 
 dotenv.config();
 if (!process.env.JWT_SECRET) {
@@ -19,7 +22,13 @@ app.disable("x-powered-by");
 
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS blocked"));
+    },
     credentials: true,
   }),
 );

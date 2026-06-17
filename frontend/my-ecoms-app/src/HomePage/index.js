@@ -190,8 +190,12 @@ const HomePage = ({ isAdmin = false }) => {
 
   // ---------------- LOADING UI ----------------
   if (loading) {
-    return <div className="loader">Loading Products...</div>;
-  }
+  return (
+    <div className="page-loader">
+      <div className="spinner"></div>
+    </div>
+  );
+}
 
   return (
     <div className="home-container">
