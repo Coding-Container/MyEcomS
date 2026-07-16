@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const errorHandler = require("./middleware/errorHandler");
 
 const helmet = require("helmet");
+const compression = require("compression");
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -18,6 +19,7 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 app.use(helmet());
 app.use(express.json());
+app.use(compression());
 app.disable("x-powered-by");
 
 app.use(
@@ -63,6 +65,9 @@ app.use("/api/payment", paymentRoutes);
 
 const addressRoutes = require("./routes/addressRoutes");
 app.use("/api/address", addressRoutes);
+
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 

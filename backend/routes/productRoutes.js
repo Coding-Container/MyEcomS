@@ -6,7 +6,7 @@ const { protect, admin } = require("../middleware/authMiddleware");
 
 router.get("/", protect, async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().lean();
     res.json(products);
   } catch (e) {
     res.status(500).json({ message: e.message });

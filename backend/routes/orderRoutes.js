@@ -11,7 +11,9 @@ const getAnalytics = async (req, res, next) => {
   try {
     const deliveredOrders = await Order.find({
       status: "Delivered",
-    });
+    })
+      .select("items totalAmount createdAt")
+      .lean();
 
     const totalOrders = deliveredOrders.length;
 
@@ -104,7 +106,9 @@ const getGraphAnalytics = async (req, res, next) => {
   try {
     const deliveredOrders = await Order.find({
       status: "Delivered",
-    });
+    })
+      .select("items")
+      .lean();
 
     const productStats = {};
 
@@ -140,7 +144,9 @@ const getProductTrend = async (req, res, next) => {
 
     const deliveredOrders = await Order.find({
       status: "Delivered",
-    });
+    })
+      .select("items createdAt")
+      .lean();
 
     const months = [
       "Jan",
@@ -224,7 +230,7 @@ router.post("/", protect, async (req, res, next) => {
 
         await product.save();
       } catch (e) {
-        next(e)
+        next(e);
       }
     }
 
@@ -252,7 +258,6 @@ router.post("/", protect, async (req, res, next) => {
     });
 
     await Cart.deleteMany({ user: req.user._id });
-    
 
     res.status(201).json(order);
   } catch (e) {
@@ -281,7 +286,8 @@ router.get("/", protect, async (req, res, next) => {
 
     const orders = await Order.find({})
       .populate("user", "username email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json(orders);
   } catch (e) {
