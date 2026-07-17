@@ -17,6 +17,7 @@ if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is missing");
 }
 const app = express();
+app.set("trust proxy", 1);
 app.use(helmet());
 app.use(express.json());
 app.use(compression());
