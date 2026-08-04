@@ -11,12 +11,14 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async (email, subject, html) => {
-  await transporter.sendMail({
-    from: `"MyEcomS" <${process.env.BREVO_USER}>`,
+  const info = await transporter.sendMail({
+    from: `"MyEcomS" <blgnd227@gmail.com>`,
     to: email,
     subject,
     html,
   });
+
+  console.log(info.messageId);
 };
 
 module.exports = sendEmail;
