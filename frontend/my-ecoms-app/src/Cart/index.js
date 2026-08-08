@@ -30,7 +30,6 @@ const CartPage = () => {
 
   const token = getToken();
 
-  // ================= CART =================
   const getCartItems = useCallback(async () => {
     try {
       setLoading(true);
@@ -47,11 +46,10 @@ const CartPage = () => {
       toast.error("Cart load failed");
     } finally {
       setLoading(false);
-      setInitialLoading(false); // 🔥 ADD THIS LINE
+      setInitialLoading(false);
     }
   }, []);
 
-  // ================= ADDRESS =================
   const getAddresses = useCallback(async () => {
     if (!token) return;
     try {
@@ -93,7 +91,6 @@ const CartPage = () => {
     }
   };
 
-  // ================= TOTAL =================
   const totalAmount = useMemo(() => {
     return cartItems.reduce(
       (acc, item) => acc + item.product.price * item.qty,
@@ -101,7 +98,6 @@ const CartPage = () => {
     );
   }, [cartItems]);
 
-  // ================= REMOVE =================
   const removeItem = async (id) => {
     try {
       await api.delete(`/api/cart/${id}`, {
@@ -141,7 +137,6 @@ const CartPage = () => {
     }
   };
 
-  // ================= ORDER =================
   const placeOrderAfterPayment = async (paymentResponse) => {
     if (placingOrder) return;
 
@@ -168,7 +163,7 @@ const CartPage = () => {
       if (data?._id) {
         // IMPORTANT: backend already clears cart → do NOT double delete
 
-        await getCartItems(); // 🔥 DB nundi fresh cart fetch
+        await getCartItems();
 
         window.dispatchEvent(new Event("cartUpdated"));
 
@@ -183,7 +178,6 @@ const CartPage = () => {
     }
   };
 
-  // ================= PAYMENT =================
   const handlePayment = async () => {
     if (placingOrder) return;
 
@@ -215,11 +209,9 @@ const CartPage = () => {
     }
   };
 
-  // ================= LOAD =================
   useEffect(() => {
     getCartItems();
     getAddresses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (initialLoading) {
@@ -246,7 +238,6 @@ const CartPage = () => {
           </div>
         ) : (
           <>
-            {/* ITEMS */}
             <div className="cart-items">
               {cartItems.map((item) => (
                 <div key={item._id} className="cart-item-card">
@@ -291,7 +282,6 @@ const CartPage = () => {
               ))}
             </div>
 
-            {/* ADDRESS */}
             <div className="address-section">
               <h2>Delivery Address</h2>
 
@@ -329,7 +319,6 @@ const CartPage = () => {
               </button>
             </div>
 
-            {/* TOTAL */}
             <div className="cart-summary">
               <h2>Total: ₹ {totalAmount}</h2>
 
@@ -342,7 +331,6 @@ const CartPage = () => {
               </button>
             </div>
 
-            {/* MODAL */}
             {showAddressForm && (
               <div className="address-modal-overlay">
                 <div className="address-modal-box">

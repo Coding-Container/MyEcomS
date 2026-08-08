@@ -121,7 +121,7 @@ router.delete("/:id", protect, async (req, res) => {
   });
 });
 
-// ================= UPDATE QUANTITY =================
+
 router.put("/update/:id", protect, async (req, res) => {
   try {
     const { qty } = req.body;

@@ -19,7 +19,6 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* AUTH */}
         <Route path="/login" element={<Loginpage />} />
 
         {/* ADMIN ROUTES */}
@@ -77,7 +76,7 @@ const App = () => {
           }
         />
 
-        {/* USER ROUTES */}
+
         <Route
           path="/"
           element={

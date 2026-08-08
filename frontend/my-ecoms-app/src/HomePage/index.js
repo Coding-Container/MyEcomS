@@ -159,7 +159,7 @@ const HomePage = ({ isAdmin = false }) => {
     }
   };
 
-  // ---------------- DECREMENT ----------------
+
   const onDecrement = async (cartId) => {
     try {
       const token = getToken();
@@ -177,7 +177,7 @@ const HomePage = ({ isAdmin = false }) => {
     }
   };
 
-  // ---------------- EFFECT ----------------
+
   useEffect(() => {
     getAllProducts();
     getCartItems();
@@ -188,7 +188,7 @@ const HomePage = ({ isAdmin = false }) => {
     return () => window.removeEventListener("cartUpdated", updateCart);
   }, [getAllProducts]);
 
-  // ---------------- LOADING UI ----------------
+
   if (loading) {
   return (
     <div className="page-loader">
@@ -199,7 +199,7 @@ const HomePage = ({ isAdmin = false }) => {
 
   return (
     <div className="home-container">
-      {/* CATEGORY */}
+
       <div className="category-buttons">
         {["trend", "gift", "corporate", "fest", "all"].map((type) => (
           <button
@@ -214,7 +214,7 @@ const HomePage = ({ isAdmin = false }) => {
         ))}
       </div>
 
-      {/* PRODUCTS */}
+
       <ul className="products-grid">
         {products.map((each) => {
           const cartItem = cartItems.find(
@@ -343,7 +343,7 @@ const HomePage = ({ isAdmin = false }) => {
                   </div>
                 )}
 
-                {/* USER ACTIONS */}
+
                 {!isAdmin &&
                   (each.countInStock === 0 ? (
                     <button className="out-stock-btn" disabled>
