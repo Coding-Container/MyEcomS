@@ -3,4 +3,9 @@ build
 .git
 .gitignore
 .env
+.env.*
+!.env.example
+dist
 npm-debug.log
+coverage
+src/**/*.test.js

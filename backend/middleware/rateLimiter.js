@@ -21,7 +21,16 @@ const otpLimiter = rateLimit({
   },
 });
 
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { message: "Too many assistant requests. Try again shortly." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   loginLimiter,
   otpLimiter,
+  aiLimiter,
 };

@@ -2,17 +2,59 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: myecoms-backend
     ports:
       - "5000:5000"
-    env_file:
-      - ./backend/.env
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGO_URI: ${MONGO_URI:?set MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:?set RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:?set RAZORPAY_KEY_SECRET}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?set GEMINI_API_KEY}
+      EMAIL_USER: ${EMAIL_USER:?set EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS:?set EMAIL_PASS}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?set ALLOWED_ORIGINS}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
   frontend:
     build:
       context: ./frontend/my-ecoms-app
-    container_name: myecoms-frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:?set VITE_API_URL}
     ports:
-      - "3000:80"
+      - "3000:8080"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5

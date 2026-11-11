@@ -5,12 +5,16 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: true,
+      trim: true,
+      unique: true,
     },
 
     email: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
     },
 
     mobile: {
@@ -28,11 +32,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    otp: String,
-
-    otpExpiry: Date,
-
-    resetOtp: String,
+    resetOtpHash: String,
 
     resetOtpExpiry: Date,
 
@@ -40,9 +40,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    passwordResetVerified: {
-      type: Boolean,
-      default: false,
+    tokenVersion: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
   {

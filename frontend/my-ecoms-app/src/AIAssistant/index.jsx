@@ -9,35 +9,21 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    console.log("Send button clicked");
+  const sendMessage = async (message = input) => {
+    const userMessage = message.trim();
+    if (!userMessage || loading) return;
 
     try {
       setLoading(true);
 
-      const userMessage = input;
-
-      /*setMessages((prev) => [
-        ...prev,
-        {
-          sender: "user",
-          text: userMessage,
-        },
-      ]);*/
-
       setMessages((prev) => {
-        const updated = [
+        return [
           ...prev,
           {
             sender: "user",
             text: userMessage,
           },
         ];
-
-        console.log("Updated Messages:", updated);
-
-        return updated;
       });
 
       setInput("");
@@ -46,18 +32,20 @@ const AIAssistant = () => {
         message: userMessage,
       });
 
-      console.log("AI Response:", data);
-
       setMessages((prev) => [
         ...prev,
         {
           sender: "ai",
-          text: data?.reply || "No response from AI.",
+          text:
+            data?.reply ||
+            (data?.products?.length
+              ? data.products
+                  .map((product) => `${product.name} - ₹${product.price}`)
+                  .join("\n")
+              : "No response from AI."),
         },
       ]);
     } catch (error) {
-      console.log(error);
-
       setMessages((prev) => [
         ...prev,
         {
@@ -79,7 +67,6 @@ const AIAssistant = () => {
       return;
     }
 
-    // Previous recognition ni stop cheyyi
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -92,24 +79,23 @@ const AIAssistant = () => {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
-      console.log("Listening...");
-      setInput(""); // Mic click chesina ventane previous text clear
+      setInput("");
     };
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
-      setTimeout(() => {
-        sendMessage(transcript);
-      }, 100);
+      sendMessage(transcript);
     };
 
     recognition.onerror = (event) => {
-      console.log("Speech Error:", event.error);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Speech recognition failed. Please type your message." },
+      ]);
     };
 
     recognition.onend = () => {
-      console.log("Stopped Listening");
       recognitionRef.current = null;
     };
 
@@ -119,7 +105,11 @@ const AIAssistant = () => {
 
   return (
     <>
-      <button className="ai-floating-button" onClick={() => setIsOpen(!isOpen)}>
+      <button
+        className="ai-floating-button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "Close shopping assistant" : "Open shopping assistant"}
+      >
         🤖
       </button>
 
@@ -127,7 +117,9 @@ const AIAssistant = () => {
         <div className="ai-chat-container">
           <div className="ai-chat-header">
             <h3>AI Shopping Assistant</h3>
-            <button onClick={() => setIsOpen(false)}>✕</button>
+            <button onClick={() => setIsOpen(false)} aria-label="Close assistant">
+              ✕
+            </button>
           </div>
 
           <div className="ai-chat-body">
@@ -162,6 +154,7 @@ const AIAssistant = () => {
             <input
               type="text"
               placeholder="Ask anything..."
+              aria-label="Message shopping assistant"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -170,8 +163,10 @@ const AIAssistant = () => {
                 }
               }}
             />
-            <button onClick={sendMessage}>{loading ? "..." : "➤"}</button>
-            <button onClick={startListening}>🎤</button>
+            <button onClick={() => sendMessage()} disabled={loading} aria-label="Send message">
+              {loading ? "..." : "➤"}
+            </button>
+            <button onClick={startListening} aria-label="Start voice input">🎤</button>
           </div>
         </div>
       )}

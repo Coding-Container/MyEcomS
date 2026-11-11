@@ -31,6 +31,7 @@ const Loginpage = () => {
   const [newPassword, setNewPassword] = useState("");
 
   const [otpVerified, setOtpVerified] = useState(false);
+  const [resetToken, setResetToken] = useState("");
 
   const [forgotOtpSent, setForgotOtpSent] = useState(false);
 
@@ -215,13 +216,14 @@ const Loginpage = () => {
     try {
       setLoading(true);
 
-      await api.post("/api/users/verify-reset-otp", {
+      const { data } = await api.post("/api/users/verify-reset-otp", {
         email: forgotEmail,
         otp: forgotOtp,
       });
 
       toast.success("OTP verified");
 
+      setResetToken(data.resetToken);
       setOtpVerified(true);
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid OTP");
@@ -235,7 +237,7 @@ const Loginpage = () => {
       setLoading(true);
 
       await api.post("/api/users/reset-password", {
-        email: forgotEmail,
+        resetToken,
         password: newPassword,
       });
 
@@ -246,6 +248,7 @@ const Loginpage = () => {
       setForgotEmail("");
       setForgotOtp("");
       setNewPassword("");
+      setResetToken("");
 
       setOtpVerified(false);
     } catch (err) {
@@ -271,6 +274,8 @@ const Loginpage = () => {
               <input
                 type="email"
                 placeholder="Enter Email"
+                aria-label="Account email"
+                autoComplete="email"
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
               />
@@ -292,6 +297,9 @@ const Loginpage = () => {
                   <input
                     type="text"
                     placeholder="Enter OTP"
+                    aria-label="Password reset code"
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
                     value={forgotOtp}
                     onChange={(e) => setForgotOtp(e.target.value)}
                   />
@@ -311,7 +319,11 @@ const Loginpage = () => {
                   <input
                     type="password"
                     placeholder="New Password"
+                    aria-label="New password"
+                    autoComplete="new-password"
                     value={newPassword}
+                    minLength={10}
+                    maxLength={128}
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
 
@@ -325,18 +337,20 @@ const Loginpage = () => {
                 </>
               )}
 
-              <p
+              <button
+                type="button"
                 className="back-login"
                 onClick={() => {
                   setShowForgotPassword(false);
                   setForgotEmail("");
                   setForgotOtp("");
                   setNewPassword("");
+                  setResetToken("");
                   setOtpVerified(false);
                 }}
               >
                 Back To Login
-              </p>
+              </button>
             </div>
           ) : showOtpScreen ? (
             <div className="otp-container">
@@ -349,6 +363,9 @@ const Loginpage = () => {
               <input
                 type="text"
                 placeholder="Enter 6 Digit OTP"
+                aria-label="Email verification code"
+                autoComplete="one-time-code"
+                inputMode="numeric"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 maxLength={6}
@@ -370,7 +387,8 @@ const Loginpage = () => {
                 </button>
               )}
 
-              <p
+              <button
+                type="button"
                 className="back-login"
                 onClick={() => {
                   setShowOtpScreen(false);
@@ -379,14 +397,18 @@ const Loginpage = () => {
                 }}
               >
                 Back to Signup
-              </p>
+              </button>
             </div>
           ) : isLogin ? (
             <form onSubmit={onLoginSubmit}>
               <h2>Sign in</h2>
 
               <input
+                type="email"
                 placeholder="Email"
+                aria-label="Email"
+                autoComplete="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -394,6 +416,9 @@ const Loginpage = () => {
               <input
                 type="password"
                 placeholder="Password"
+                aria-label="Password"
+                autoComplete="current-password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -402,14 +427,17 @@ const Loginpage = () => {
                 {loading ? "Loading..." : "Login"}
               </button>
               <div className="login-links">
-                <p onClick={() => setIsLogin(false)}>Create account</p>
+                <button className="text-action" type="button" onClick={() => setIsLogin(false)}>
+                  Create account
+                </button>
 
-                <p
+                <button
+                  type="button"
                   className="forgot-password-link"
                   onClick={() => setShowForgotPassword(true)}
                 >
                   Forgot Password?
-                </p>
+                </button>
               </div>
             </form>
           ) : (
@@ -418,18 +446,30 @@ const Loginpage = () => {
 
               <input
                 placeholder="Username"
+                aria-label="Username"
+                autoComplete="username"
+                required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
 
               <input
+                type="email"
                 placeholder="Email"
+                aria-label="Email"
+                autoComplete="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
               <input
+                type="tel"
                 placeholder="Mobile +91XXXXXXXXXX"
+                aria-label="Mobile number"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                required
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
               />
@@ -437,6 +477,11 @@ const Loginpage = () => {
               <input
                 type="password"
                 placeholder="Password"
+                aria-label="Password"
+                autoComplete="new-password"
+                minLength={10}
+                maxLength={128}
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -445,9 +490,9 @@ const Loginpage = () => {
                 {loading ? "Sending OTP..." : "Signup"}
               </button>
 
-              <p onClick={() => setIsLogin(true)}>
+              <button className="text-action" type="button" onClick={() => setIsLogin(true)}>
                 Already have account? Sign in
-              </p>
+              </button>
             </form>
           )}
         </div>

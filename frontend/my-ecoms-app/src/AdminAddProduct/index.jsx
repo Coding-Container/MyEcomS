@@ -19,27 +19,28 @@ const AdminAddProduct = () => {
   const [description, setDescription] = useState("");
   const [countInStock, setCountInStock] = useState("");
   const [type, setType] = useState(chocotype[0].id);
+  const [submitting, setSubmitting] = useState(false);
 
-  const onProductAdd = (e) => {
+  const onProductAdd = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
     const createdProduct = {
-      name,
-      price,
+      name: name.trim(),
+      price: Number(price),
       imageUrl,
-      description,
-      countInStock,
+      description: description.trim(),
+      countInStock: Number(countInStock),
       type,
     };
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
     try {
-      api.post("/api/products", createdProduct, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
+      setSubmitting(true);
+      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "null");
+      await api.post("/api/products", createdProduct, {
+        headers: { Authorization: `Bearer ${userInfo?.token}` },
       });
-      console.log("CREATED:", createdProduct);
+      toast.success("Product added successfully");
       setName("");
       setPrice("");
       setImageUrl("");
@@ -48,6 +49,8 @@ const AdminAddProduct = () => {
       setType(chocotype[0].id);
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -59,8 +62,9 @@ const AdminAddProduct = () => {
           <h2>Add Product</h2>
 
           <div className="form-group">
-            <label>Name</label>
+            <label htmlFor="product-name">Name</label>
             <input
+              id="product-name"
               type="text"
               placeholder="Enter product name"
               value={name}
@@ -69,9 +73,12 @@ const AdminAddProduct = () => {
           </div>
 
           <div className="form-group">
-            <label>Price</label>
+            <label htmlFor="product-price">Price</label>
             <input
+              id="product-price"
               type="number"
+              min="0.01"
+              step="0.01"
               placeholder="Enter price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
@@ -79,8 +86,10 @@ const AdminAddProduct = () => {
           </div>
 
           <div className="form-group">
-            <label>Image URL</label>
+            <label htmlFor="product-image-url">Image URL</label>
             <input
+              id="product-image-url"
+              type="url"
               type="text"
               placeholder="Enter Image URL"
               value={imageUrl}
@@ -89,8 +98,9 @@ const AdminAddProduct = () => {
           </div>
 
           <div className="form-group">
-            <label>Description</label>
+            <label htmlFor="product-description">Description</label>
             <input
+              id="product-description"
               type="text"
               placeholder="Enter description"
               value={description}
@@ -99,9 +109,12 @@ const AdminAddProduct = () => {
           </div>
 
           <div className="form-group">
-            <label>Count in Stock</label>
+            <label htmlFor="product-stock">Count in Stock</label>
             <input
+              id="product-stock"
               type="number"
+              min="0"
+              step="1"
               placeholder="Enter stock count"
               value={countInStock}
               onChange={(e) => setCountInStock(e.target.value)}
@@ -109,8 +122,8 @@ const AdminAddProduct = () => {
           </div>
 
           <div className="form-group">
-            <label>Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value)}>
+            <label htmlFor="product-type">Type</label>
+            <select id="product-type" value={type} onChange={(e) => setType(e.target.value)}>
               {chocotype.map((each) => (
                 <option key={each.id} value={each.id}>
                   {each.name}
@@ -119,7 +132,9 @@ const AdminAddProduct = () => {
             </select>
           </div>
 
-          <button className="submit-btn">Add Item</button>
+          <button className="submit-btn" disabled={submitting}>
+            {submitting ? "Adding..." : "Add Item"}
+          </button>
         </form>
       </div>
     </>

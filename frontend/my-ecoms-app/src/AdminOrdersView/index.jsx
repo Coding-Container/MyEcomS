@@ -36,7 +36,7 @@ const AdminOrdersView = () => {
         },
       });
 
-      setOrders(data);
+      setOrders(data.orders || data);
     } catch (error) {
       const message = error.response?.data?.message || "Failed to fetch orders";
 
