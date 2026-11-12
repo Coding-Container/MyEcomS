@@ -196,19 +196,33 @@
   margin-top: 12px;
 }
 
-.login-links p {
+.login-links button,
+.text-action {
+  border: 0;
+  padding: 0;
+  background: transparent;
   cursor: pointer;
   color: #2563eb;
   font-size: 14px;
   font-weight: 600;
 }
 
-.login-links p:hover {
+.login-links button:hover,
+.text-action:hover {
   text-decoration: underline;
 }
 
 .forgot-password-link {
   margin: 0;
+}
+
+.back-login {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  text-align: left;
 }
 
 .forgot-link {

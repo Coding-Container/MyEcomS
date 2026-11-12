@@ -1,9 +1,9 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number.parseInt(process.env.SMTP_PORT, 10) || 465,
+  secure: process.env.SMTP_SECURE !== "false",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -19,9 +19,9 @@ const sendEmail = async (email, subject, html) => {
       html,
     });
 
-    console.log("Email Sent:", info.messageId);
+    console.log("Email sent", { messageId: info.messageId });
   } catch (err) {
-    console.error("SMTP ERROR:", err);
+    console.error("Email delivery failed", { error: err.name });
     throw err;
   }
 };

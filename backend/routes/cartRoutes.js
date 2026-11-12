@@ -1,154 +1,161 @@
 const express = require("express");
-const router = express.Router();
+const mongoose = require("mongoose");
 const Product = require("../models/products");
 const Cart = require("../models/cart");
 const { protect } = require("../middleware/authMiddleware");
 
-router.post("/", protect, async (req, res) => {
+const router = express.Router();
+
+router.post("/", protect, async (req, res, next) => {
   try {
-    const { productId } = req.body;
-
-    const existingCartItem = await Cart.findOne({
-      user: req.user._id,
-      product: productId,
-    });
-
-    if (existingCartItem) {
-      const product = await Product.findById(productId);
-
-      if (existingCartItem.qty >= product.countInStock) {
-        return res.status(400).json({
-          message: `Only ${product.countInStock} items available in stock`,
-        });
-      }
-
-      existingCartItem.qty += 1;
-
-      await existingCartItem.save();
-
-      return res.status(200).json(existingCartItem);
+    const { productId } = req.body || {};
+    if (!mongoose.isValidObjectId(productId)) {
+      return res.status(400).json({ message: "A valid product is required" });
     }
 
-    const cartItem = await Cart.create({
-      user: req.user._id,
-      product: productId,
-      qty: 1,
-    });
+    const product = await Product.findById(productId).lean();
+    if (!product || product.isActive === false) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    if (!Number.isInteger(product.countInStock) || product.countInStock < 1) {
+      return res.status(409).json({ message: "Product is out of stock" });
+    }
 
-    res.status(201).json(cartItem);
+    const updated = await Cart.findOneAndUpdate(
+      { user: req.user._id, product: productId, qty: { $lt: product.countInStock } },
+      { $inc: { qty: 1 } },
+      { new: true, runValidators: true },
+    );
+    if (updated) return res.json(updated);
+
+    const existing = await Cart.findOne({ user: req.user._id, product: productId });
+    if (existing) {
+      return res.status(409).json({ message: `Only ${product.countInStock} items available in stock` });
+    }
+
+    try {
+      const item = await Cart.create({
+        user: req.user._id,
+        product: productId,
+        qty: 1,
+      });
+      return res.status(201).json(item);
+    } catch (error) {
+      if (error.code !== 11000) throw error;
+      const racedUpdate = await Cart.findOneAndUpdate(
+        { user: req.user._id, product: productId, qty: { $lt: product.countInStock } },
+        { $inc: { qty: 1 } },
+        { new: true, runValidators: true },
+      );
+      if (!racedUpdate) {
+        return res.status(409).json({ message: `Only ${product.countInStock} items available in stock` });
+      }
+      return res.json(racedUpdate);
+    }
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 });
-router.get("/", protect, async (req, res) => {
-  try {
-    const cartItems = await Cart.find({
-      user: req.user._id,
-    }).populate("product");
 
+router.get("/", protect, async (req, res, next) => {
+  try {
+    const cartItems = await Cart.find({ user: req.user._id })
+      .populate({ path: "product", match: { isActive: { $ne: false } } })
+      .lean();
     res.json(cartItems);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 });
-router.put("/increment/:id", protect, async (req, res) => {
+
+router.put("/increment/:id", protect, async (req, res, next) => {
   try {
-    const cartItem = await Cart.findById(req.params.id);
-
-    if (!cartItem) {
-      return res.status(404).json({
-        message: "Cart Item Not Found",
-      });
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(404).json({ message: "Cart item not found" });
+    const item = await Cart.findOne({ _id: id, user: req.user._id });
+    if (!item) return res.status(404).json({ message: "Cart item not found" });
+    const product = await Product.findById(item.product).lean();
+    if (!product || product.isActive === false) {
+      return res.status(409).json({ message: "Product is no longer available" });
     }
 
-    const product = await Product.findById(cartItem.product);
-
-    if (cartItem.qty >= product.countInStock) {
-      return res.status(400).json({
-        message: `Only ${product.countInStock} items available in stock`,
-      });
-    }
-
-    cartItem.qty += 1;
-
-    await cartItem.save();
-
-    res.json(cartItem);
+    const updated = await Cart.findOneAndUpdate(
+      { _id: id, user: req.user._id, qty: { $lt: product.countInStock } },
+      { $inc: { qty: 1 } },
+      { new: true, runValidators: true },
+    );
+    if (!updated) return res.status(409).json({ message: "Requested quantity exceeds available stock" });
+    res.json(updated);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 });
-router.put("/decrement/:id", protect, async (req, res) => {
+
+router.put("/decrement/:id", protect, async (req, res, next) => {
   try {
-    const cartItem = await Cart.findById(req.params.id);
-
-    if (!cartItem) {
-      return res.status(404).json({
-        message: "Cart Item Not Found",
-      });
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(404).json({ message: "Cart item not found" });
+    const item = await Cart.findOne({ _id: id, user: req.user._id });
+    if (!item) return res.status(404).json({ message: "Cart item not found" });
+    if (item.qty === 1) {
+      await Cart.deleteOne({ _id: id, user: req.user._id });
+      return res.json({ message: "Item removed" });
     }
-
-    if (cartItem.qty === 1) {
-      await Cart.findByIdAndDelete(req.params.id);
-
-      return res.json({
-        message: "Item Removed",
-      });
-    }
-
-    cartItem.qty -= 1;
-
-    await cartItem.save();
-
-    res.json(cartItem);
+    const updated = await Cart.findOneAndUpdate(
+      { _id: id, user: req.user._id, qty: { $gt: 1 } },
+      { $inc: { qty: -1 } },
+      { new: true, runValidators: true },
+    );
+    if (!updated) return res.status(409).json({ message: "Cart item changed; reload and retry" });
+    res.json(updated);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 });
-router.delete("/:id", protect, async (req, res) => {
-  await Cart.findByIdAndDelete(req.params.id);
 
-  res.json({
-    message: "Item Removed",
-  });
-});
-
-
-router.put("/update/:id", protect, async (req, res) => {
+router.delete("/:id", protect, async (req, res, next) => {
   try {
-    const { qty } = req.body;
-
-    if (qty < 1) {
-      return res.status(400).json({
-        message: "Quantity cannot be less than 1",
-      });
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: "Cart item not found" });
     }
-
-    const cartItem = await Cart.findById(req.params.id);
-
-    if (!cartItem) {
-      return res.status(404).json({
-        message: "Cart item not found",
-      });
-    }
-
-    cartItem.qty = qty;
-    await cartItem.save();
-
-    res.json({
-      message: "Cart updated successfully",
-      cartItem,
-    });
+    const result = await Cart.deleteOne({ _id: req.params.id, user: req.user._id });
+    if (!result.deletedCount) return res.status(404).json({ message: "Cart item not found" });
+    res.json({ message: "Item removed" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
+
+router.put("/update/:id", protect, async (req, res, next) => {
+  try {
+    const { qty } = req.body || {};
+    if (!Number.isSafeInteger(qty) || qty < 1) {
+      return res.status(400).json({ message: "Quantity must be a positive integer" });
+    }
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: "Cart item not found" });
+    }
+
+    const item = await Cart.findOne({ _id: req.params.id, user: req.user._id });
+    if (!item) return res.status(404).json({ message: "Cart item not found" });
+    const product = await Product.findById(item.product).lean();
+    if (!product || product.isActive === false) {
+      return res.status(409).json({ message: "Product is no longer available" });
+    }
+    if (qty > product.countInStock) {
+      return res.status(409).json({ message: "Requested quantity exceeds available stock" });
+    }
+
+    const updated = await Cart.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { $set: { qty } },
+      { new: true, runValidators: true },
+    );
+    if (!updated) return res.status(404).json({ message: "Cart item not found" });
+    res.json({ message: "Cart updated successfully", cartItem: updated });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

@@ -1,23 +1,30 @@
 const Product = require("../models/products");
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const searchProducts = async (intentData) => {
-  const query = {};
+  const query = { isActive: { $ne: false } };
 
   if (intentData.category) {
-    query.type = new RegExp(intentData.category, "i");
+    query.type = new RegExp(escapeRegex(intentData.category), "i");
   }
 
   if (intentData.productName) {
-    query.name = new RegExp(intentData.productName, "i");
+    query.name = new RegExp(escapeRegex(intentData.productName), "i");
   }
 
-  if (intentData.maxPrice) {
+  if (intentData.maxPrice !== null || intentData.minPrice !== null) {
     query.price = {
-      $lte: intentData.maxPrice,
+      ...(intentData.maxPrice !== null ? { $lte: intentData.maxPrice } : {}),
+      ...(intentData.minPrice !== null ? { $gte: intentData.minPrice } : {}),
     };
   }
 
-  const products = await Product.find(query);
+  const products = await Product.find(query)
+    .select("name price imageUrl type")
+    .limit(20)
+    .maxTimeMS(1500)
+    .lean();
 
   return products;
 };

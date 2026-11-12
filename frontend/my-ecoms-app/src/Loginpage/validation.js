@@ -3,8 +3,7 @@ export const validateSignup = (data) => {
 
   const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,12}$/;
+  const passwordRegex = /^[\s\S]{10,128}$/;
   const mobileRegex = /^[6-9]\d{9}$/;
 
   // username
@@ -19,7 +18,7 @@ export const validateSignup = (data) => {
   // password
   if (!data.password) errors.password = "Password required";
   else if (!passwordRegex.test(data.password))
-    errors.password = "Password must include A,a,1,@ and 6-12 chars";
+    errors.password = "Password must be 10 to 128 characters";
 
   // mobile
   if (!data.mobile) {

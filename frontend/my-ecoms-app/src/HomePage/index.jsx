@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../api/axios";
 import { getToken } from "../auth";
+import { refreshCart, useCartItems } from "../Cart/cartStore";
 import "./index.css";
 
 const HomePage = ({ isAdmin = false }) => {
   const [products, setProducts] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
+  const cartItems = useCartItems();
   const [chocoType, setChocoType] = useState("all");
   const [loading, setLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -108,21 +109,6 @@ const HomePage = ({ isAdmin = false }) => {
   }, [chocoType]);
 
   // ---------------- CART ----------------
-  const getCartItems = async () => {
-    try {
-      const token = getToken();
-      if (!token) return;
-
-      const { data } = await api.get("/api/cart", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setCartItems(data);
-    } catch (error) {
-      console.log("CART ERROR:", error);
-    }
-  };
-
   // ---------------- ADD TO CART ----------------
   const onAddToCart = async (each) => {
     try {
@@ -134,8 +120,7 @@ const HomePage = ({ isAdmin = false }) => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      window.dispatchEvent(new Event("cartUpdated"));
-      getCartItems();
+      await refreshCart();
     } catch (error) {
       console.log(error);
     }
@@ -152,8 +137,7 @@ const HomePage = ({ isAdmin = false }) => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      window.dispatchEvent(new Event("cartUpdated"));
-      getCartItems();
+      await refreshCart();
     } catch (error) {
       alert(error.response?.data?.message || "Unable to add more items");
     }
@@ -170,8 +154,7 @@ const HomePage = ({ isAdmin = false }) => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      window.dispatchEvent(new Event("cartUpdated"));
-      getCartItems();
+      await refreshCart();
     } catch (error) {
       console.log(error);
     }
@@ -180,12 +163,7 @@ const HomePage = ({ isAdmin = false }) => {
 
   useEffect(() => {
     getAllProducts();
-    getCartItems();
-
-    const updateCart = () => getCartItems();
-    window.addEventListener("cartUpdated", updateCart);
-
-    return () => window.removeEventListener("cartUpdated", updateCart);
+    refreshCart().catch((error) => console.error("Cart load failed", error.name));
   }, [getAllProducts]);
 
 
@@ -218,7 +196,7 @@ const HomePage = ({ isAdmin = false }) => {
       <ul className="products-grid">
         {products.map((each) => {
           const cartItem = cartItems.find(
-            (item) => item.product._id === each.id,
+            (item) => item.product?._id === each.id,
           );
 
           return (

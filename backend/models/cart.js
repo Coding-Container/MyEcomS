@@ -17,11 +17,15 @@ const cartSchema = new mongoose.Schema(
     qty: {
       type: Number,
       default: 1,
+      min: 1,
+      validate: Number.isInteger,
     },
   },
   {
     timestamps: true,
   },
 );
+
+cartSchema.index({ user: 1, product: 1 }, { unique: true });
 
 module.exports = mongoose.model("Cart", cartSchema);

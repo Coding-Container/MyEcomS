@@ -25,13 +25,15 @@ const BizGraphs = () => {
 
   const [trendData, setTrendData] = useState([]);
 
-  const getTrendData = useCallback(async (productName, year) => {
+  const getTrendData = useCallback(async (productKey, year) => {
     try {
       const token = getToken();
 
       const { data } = await api.get("/api/orders/product-trend", {
         params: {
-          productName,
+          ...(productKey && /^[a-f\d]{24}$/i.test(productKey)
+            ? { productId: productKey }
+            : { productName: productKey }),
           year,
         },
         headers: {
@@ -46,17 +48,10 @@ const BizGraphs = () => {
   }, []);
 
   useEffect(() => {
-    getGraphData();
-  }, []);
-  useEffect(() => {
-    if (graphData.length > 0) {
-      const firstProduct = graphData[0].name;
-
-      setSelectedProduct(firstProduct);
-
-      getTrendData(firstProduct, selectedYear);
+    if (graphData.length > 0 && !selectedProduct) {
+      setSelectedProduct(graphData[0].productId || graphData[0].name);
     }
-  }, [graphData, getTrendData, selectedYear]);
+  }, [graphData, selectedProduct]);
 
   useEffect(() => {
     if (selectedProduct) {
@@ -64,7 +59,7 @@ const BizGraphs = () => {
     }
   }, [selectedProduct, selectedYear, getTrendData]);
 
-  const getGraphData = async () => {
+  const getGraphData = useCallback(async () => {
     try {
       const token = getToken();
 
@@ -78,7 +73,11 @@ const BizGraphs = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    getGraphData();
+  }, [getGraphData]);
 
   return (
     <>
@@ -136,7 +135,7 @@ const BizGraphs = () => {
               className="trend-select"
             >
               {graphData.map((product) => (
-                <option key={product.name} value={product.name}>
+                <option key={product.productId || product.name} value={product.productId || product.name}>
                   {product.name}
                 </option>
               ))}
@@ -147,10 +146,9 @@ const BizGraphs = () => {
               onChange={(e) => setSelectedYear(e.target.value)}
               className="trend-select"
             >
-              <option value="2026">2026</option>
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
+              {Array.from({ length: 5 }, (_, index) => new Date().getFullYear() - index).map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
             </select>
           </div>
 

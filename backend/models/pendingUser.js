@@ -22,7 +22,7 @@ const pendingUserSchema = new mongoose.Schema(
       required: true,
     },
 
-    otp: {
+    otpHash: {
       type: String,
       required: true,
     },
@@ -36,11 +36,18 @@ const pendingUserSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    otpAttempts: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+pendingUserSchema.index({ email: 1 }, { unique: true });
+pendingUserSchema.index({ otpExpiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports =
   mongoose.models.PendingUser ||

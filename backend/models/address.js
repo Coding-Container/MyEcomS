@@ -65,4 +65,10 @@ const addressSchema = new mongoose.Schema(
   },
 );
 
+addressSchema.index({ user: 1, createdAt: -1 });
+addressSchema.index(
+  { user: 1 },
+  { unique: true, partialFilterExpression: { isDefault: true } },
+);
+
 module.exports = mongoose.model("Address", addressSchema);
