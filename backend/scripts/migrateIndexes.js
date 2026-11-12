@@ -109,6 +109,7 @@ const migrate = async () => {
       { paymentId: 1 },
       { unique: true, partialFilterExpression: { paymentId: { $type: "string" } } },
     ),
+    db.collection("webhookevents").createIndex({ eventId: 1 }, { unique: true }),
     db.collection("products").createIndex({ isActive: 1, type: 1 }),
     db.collection("resetgrants").createIndex({ tokenHash: 1 }, { unique: true }),
     db.collection("resetgrants").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),

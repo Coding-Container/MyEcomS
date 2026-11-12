@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api/axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./index.css";
 import { validateSignup } from "./validation";
@@ -38,6 +38,16 @@ const Loginpage = () => {
   const [forgotTimer, setForgotTimer] = useState(30);
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const token = searchParams.get("resetToken");
+    if (!token) return;
+    setResetToken(token);
+    setOtpVerified(true);
+    setShowForgotPassword(true);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!showOtpScreen) return;
@@ -216,15 +226,16 @@ const Loginpage = () => {
     try {
       setLoading(true);
 
-      const { data } = await api.post("/api/users/verify-reset-otp", {
+      await api.post("/api/users/verify-reset-otp", {
         email: forgotEmail,
         otp: forgotOtp,
       });
 
-      toast.success("OTP verified");
-
-      setResetToken(data.resetToken);
-      setOtpVerified(true);
+      toast.success("Reset link sent to your email");
+      setShowForgotPassword(false);
+      setForgotEmail("");
+      setForgotOtp("");
+      setForgotOtpSent(false);
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid OTP");
     } finally {
@@ -271,14 +282,16 @@ const Loginpage = () => {
             <div className="forgot-container">
               <h2>Reset Password</h2>
 
-              <input
-                type="email"
-                placeholder="Enter Email"
-                aria-label="Account email"
-                autoComplete="email"
-                value={forgotEmail}
-                onChange={(e) => setForgotEmail(e.target.value)}
-              />
+              {!otpVerified && (
+                <input
+                  type="email"
+                  placeholder="Enter Email"
+                  aria-label="Account email"
+                  autoComplete="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                />
+              )}
 
               {!otpVerified && (
                 <>

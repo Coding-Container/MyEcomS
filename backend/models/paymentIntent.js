@@ -54,12 +54,26 @@ const paymentIntentSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: ["pending", "paid", "refund_pending", "refunded"],
+      enum: [
+        "pending",
+        "paid",
+        "refund_pending",
+        "refunded",
+        "failed",
+        "expired",
+        "reconciled",
+      ],
       default: "pending",
       required: true,
     },
     paymentId: {
       type: String,
+    },
+    refundId: {
+      type: String,
+    },
+    refundRequestedAt: {
+      type: Date,
     },
   },
   { timestamps: true },

@@ -10,9 +10,15 @@ configuration includes MongoDB, JWT, Razorpay, Gemini, and SMTP credentials.
 Set `ALLOWED_ORIGINS` to the exact browser origins and `TRUST_PROXY_HOPS` to
 the number of trusted ingress proxies for the environment. The default of zero
 does not trust client-supplied forwarding headers.
+Set `RAZORPAY_WEBHOOK_SECRET` to the secret configured for the Razorpay webhook
+endpoint, and `FRONTEND_URL` to the public frontend origin used in password reset
+links. Configure Razorpay to send payment and refund events to
+`POST /api/payments/webhook`.
 
 Checkout and address updates use MongoDB transactions. The database must be a
-replica set or sharded cluster; a standalone MongoDB server is not supported.
+replica set or sharded cluster in production. Development and test deployments
+warn and continue when connected to a standalone server, although transaction-
+dependent checkout operations still require a replica set or sharded cluster.
 
 ## Database rollout
 

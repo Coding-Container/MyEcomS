@@ -251,12 +251,28 @@ router.post("/verify-reset-otp", otpLimiter, async (req, res, next) => {
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
+    await ResetGrant.deleteMany({ user: user._id });
     await ResetGrant.create({
       user: user._id,
       tokenHash: hashGrant(resetToken),
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
-    res.json({ message: "OTP verified", resetToken });
+
+    if (
+      process.env.NODE_ENV !== "production" &&
+      process.env.RETURN_RESET_TOKEN_IN_TESTS === "true"
+    ) {
+      return res.json({ message: "OTP verified", resetToken });
+    }
+
+    const resetUrl = new URL("/login", process.env.FRONTEND_URL || "http://localhost:3000");
+    resetUrl.searchParams.set("resetToken", resetToken);
+    await sendEmail(
+      user.email,
+      "Reset Your MyEcoms Password",
+      `<div><h2>Password Reset</h2><p><a href="${resetUrl.toString()}">Reset your password</a></p><p>This link expires in 10 minutes.</p></div>`,
+    );
+    res.json({ message: "OTP verified. A password reset link has been sent to your email." });
   } catch (error) {
     next(error);
   }

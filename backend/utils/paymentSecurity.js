@@ -6,6 +6,9 @@ const createRazorpaySignature = (orderId, paymentId, secret) =>
     .update(`${orderId}|${paymentId}`)
     .digest("hex");
 
+const createRazorpayWebhookSignature = (rawBody, secret) =>
+  crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+
 const verifyRazorpaySignature = (orderId, paymentId, signature, secret) => {
   if (
     typeof orderId !== "string" ||
@@ -23,4 +26,24 @@ const verifyRazorpaySignature = (orderId, paymentId, signature, secret) => {
   return provided.length === expected.length && crypto.timingSafeEqual(expected, provided);
 };
 
-module.exports = { createRazorpaySignature, verifyRazorpaySignature };
+const verifyRazorpayWebhookSignature = (rawBody, signature, secret) => {
+  if (
+    !Buffer.isBuffer(rawBody) ||
+    typeof signature !== "string" ||
+    !/^[a-f0-9]{64}$/i.test(signature) ||
+    typeof secret !== "string" ||
+    !secret
+  ) {
+    return false;
+  }
+  const expected = Buffer.from(createRazorpayWebhookSignature(rawBody, secret), "hex");
+  const provided = Buffer.from(signature, "hex");
+  return provided.length === expected.length && crypto.timingSafeEqual(expected, provided);
+};
+
+module.exports = {
+  createRazorpaySignature,
+  verifyRazorpaySignature,
+  createRazorpayWebhookSignature,
+  verifyRazorpayWebhookSignature,
+};

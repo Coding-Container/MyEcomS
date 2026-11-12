@@ -18,6 +18,9 @@ const requiredEnvironment = [
   "GEMINI_API_KEY",
   "EMAIL_USER",
   "EMAIL_PASS",
+  ...(process.env.NODE_ENV === "production"
+    ? ["RAZORPAY_WEBHOOK_SECRET", "FRONTEND_URL"]
+    : []),
 ];
 const missingEnvironment = requiredEnvironment.filter((key) => !process.env[key]);
 if (missingEnvironment.length) {
@@ -49,6 +52,10 @@ app.use((req, res, next) => {
 });
 app.use(helmet());
 app.use(compression());
+app.use(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json", limit: "32kb" }),
+);
 app.use(express.json({ limit: "32kb" }));
 app.use(
   cors({
@@ -71,6 +78,7 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/payment", require("./routes/paymentRoutes"));
+app.use("/api/payments", require("./routes/paymentRoutes"));
 app.use("/api/address", require("./routes/addressRoutes"));
 app.use("/api/ai", require("./routes/aiRoutes"));
 
@@ -86,7 +94,9 @@ const start = async () => {
   });
   const topology = await mongoose.connection.db.admin().command({ hello: 1 });
   if (!topology.setName && topology.msg !== "isdbgrid") {
-    throw new Error("MongoDB replica set or sharded cluster is required for checkout transactions");
+    const message = "MongoDB replica set or sharded cluster is required for checkout transactions";
+    if (process.env.NODE_ENV === "production") throw new Error(message);
+    console.warn(`${message}; continuing outside production`);
   }
   const migration = await mongoose.connection.db
     .collection("schema_migrations")
