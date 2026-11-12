@@ -27,6 +27,7 @@ const errorHandler = (err, req, res, next) => {
       method: req.method,
       path: req.path,
       error: err.name,
+      code: err.code,
     });
   }
 

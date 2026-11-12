@@ -6,7 +6,11 @@ Copy `backend/.env.example` to `backend/.env` for direct local work. For Compose
 copy the repository-root `.env.example` to `.env` and set `VITE_API_URL` to the
 public API origin. Replace every placeholder before starting the services.
 Production secrets belong in the deployment secret manager. Required backend
-configuration includes MongoDB, JWT, Razorpay, Gemini, and SMTP credentials.
+configuration includes MongoDB, JWT, Razorpay, Gemini, and email delivery
+credentials. For Render Free services, use Resend over HTTPS by setting
+`RESEND_API_KEY` and `EMAIL_FROM` to a sender address on a domain verified with
+Resend. Otherwise, SMTP is supported with `EMAIL_USER` and `EMAIL_PASS`;
+Render Free services block outbound SMTP ports.
 Set `ALLOWED_ORIGINS` to the exact browser origins and `TRUST_PROXY_HOPS` to
 the number of trusted ingress proxies for the environment. The default of zero
 does not trust client-supplied forwarding headers.

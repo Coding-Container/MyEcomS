@@ -16,8 +16,6 @@ const requiredEnvironment = [
   "RAZORPAY_KEY_ID",
   "RAZORPAY_KEY_SECRET",
   "GEMINI_API_KEY",
-  "EMAIL_USER",
-  "EMAIL_PASS",
   ...(process.env.NODE_ENV === "production"
     ? ["RAZORPAY_WEBHOOK_SECRET", "FRONTEND_URL"]
     : []),
@@ -25,6 +23,15 @@ const requiredEnvironment = [
 const missingEnvironment = requiredEnvironment.filter((key) => !process.env[key]);
 if (missingEnvironment.length) {
   throw new Error(`Missing required environment variables: ${missingEnvironment.join(", ")}`);
+}
+if (process.env.RESEND_API_KEY && !process.env.EMAIL_FROM) {
+  throw new Error("EMAIL_FROM is required when RESEND_API_KEY is configured");
+}
+if (
+  !process.env.RESEND_API_KEY &&
+  (!process.env.EMAIL_USER || !process.env.EMAIL_PASS)
+) {
+  throw new Error("Configure RESEND_API_KEY and EMAIL_FROM, or EMAIL_USER and EMAIL_PASS");
 }
 if (process.env.JWT_SECRET.length < 32) {
   throw new Error("JWT_SECRET must be at least 32 characters");
